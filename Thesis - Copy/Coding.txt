@@ -1,0 +1,47 @@
+modelA = Sequential()
+modelA.add(LSTM(128,activation="tanh",return_sequences=True, input_shape=(1, 5)))
+modelA.add(Dropout(0.2))
+modelA.add(LSTM(128,activation="tanh", return_sequences=True))
+modelA.add(Dropout(0.3))
+modelA.add(LSTM(256, activation="tanh",return_sequences=True))
+modelA.add(Dropout(0.4))
+modelA.add(LSTM(256, activation="tanh",return_sequences=True))
+modelA.add(Dropout(0.5))
+modelA.add(Dense(1))
+modelA.compile(loss='mean_squared_error', optimizer='adam')
+historyA=modelA.fit(X_train, y_train, epochs=100, batch_size=50, verbose=2,validation_data=(X_test, y_test), shuffle=False)
+
+
+# RELU RMSE: 2446.116001671878
+# TANH RMSE: 3128.1745214528337
+
+
+
+modelB = Sequential()
+modelB.add(LSTM(128,activation="tanh",return_sequences=True, input_shape=(1, 5)))
+modelB.add(Dropout(0.2))
+modelB.add(LSTM(128,activation="tanh", return_sequences=True))
+modelB.add(Dropout(0.3))
+modelB.add(LSTM(256, activation="tanh",return_sequences=True))
+modelB.add(Dropout(0.4))
+modelB.add(Dense(1))
+modelB.compile(loss='mean_squared_error', optimizer='adam')
+historyB=modelB.fit(X_train, y_train, epochs=100, batch_size=50, verbose=2,validation_data=(X_test, y_test), shuffle=False)
+
+
+# RELU RMSE: 2284.4029808962628
+# TANH RMSE: 2733.1184963220276
+
+
+modelC = Sequential()
+modelC.add(LSTM(120,activation="sigmoid",input_shape=(1,5)))
+modelC.add(Dropout(0.2))
+modelC.add(Dense(1))
+modelC.compile(loss='mean_squared_error', optimizer='adam')
+historyC=modelC.fit(X_train, y_train, epochs=100, batch_size=50, verbose=2,validation_data=(X_test, y_test), shuffle=False)
+
+
+# SIGMOID RMSE: 1886.7381878748952
+# RELU RMSE: 289.936057021269
+# TANH RMSE: 499.30069380076367
+
