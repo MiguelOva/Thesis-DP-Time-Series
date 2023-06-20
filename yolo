@@ -100,7 +100,6 @@ ORDER BY {o:date} DESC;
 
 Exception message: Incorrect syntax near 'OFFSET'.
 
-
 SELECT DISTINCT
     {o:code} AS 'ORDER CODE',
     {o:placedCartId} AS 'CART CODE',
@@ -120,8 +119,8 @@ SELECT DISTINCT
     {oc.code} AS 'ORDER CHANNEL',
     rpi.p_recurrenttoken AS 'RECURRENT TOKEN',
     rpi.p_subscriptionid AS 'SUBSCRIPTION ID'
-FROM
-    {Order AS o
+    
+FROM {Order AS o
 LEFT JOIN ExportStatus AS ex ON {ex:pk} = {o:exportStatus}
 LEFT JOIN CmsSite AS site ON {o:site} = {site:pk}
 LEFT JOIN BaseStore AS store ON {o:store} = {store:pk}
@@ -137,19 +136,13 @@ LEFT JOIN PaymentInfo AS pi ON {o:paymentinfo} = {pi:pk}
 LEFT JOIN DeliveryMode AS dm ON {o:deliveryMode} = {dm:pk}
 LEFT JOIN DeliveryStatus AS ds ON {o:deliveryStatus} = {ds:pk}
 LEFT JOIN OrderChannel AS oc ON {o:orderChannel} = {oc:pk}
-LEFT JOIN redirectpaymentinfo AS rpi ON {o:placedCartId} = rpi.p_cartcode}
-
-WHERE {o:originalVersion} IS NULL
-    AND {o:code} NOT LIKE '%BLIND%'
-    AND {o:creationTime} BETWEEN CAST('2023-01-01 00:00:00' AS DATETIME) AND CAST('2023-06-15 23:59:59' AS DATETIME)
-    AND {country.isocode} = 'DE'
-    AND {pmist:code} = 'COMPLETED'
-    AND {ot:typeid} IN ('ZLD', 'ZL2', 'ZL3', 'ZL4', 'ZLR')
-    AND {OR:reasonID} NOT IN ('R27', 'R28')
-ORDER BY {o:date} DESC;
+LEFT JOIN redirectpaymentinfo AS rpi ON {o:placedCartId} = {rpi.p_cartcode}
+}
 
 WHERE {o:originalVersion} IS NULL
 AND {o:code} NOT LIKE '%BLIND%'
 AND {o:creationTime} BETWEEN CAST('2023-01-01 00:00:00' AS DATETIME) AND CAST('2023-06-15 23:59:59' AS DATETIME)
 AND {country.isocode} = 'DE' and {pmist:code} = 'COMPLETED' and {ot:typeid} in ('ZLD','ZL2','ZL3','ZL4','ZLR') AND {OR:reasonID} NOT IN ('R27','R28')
 ORDER BY {o:date} DESC
+
+Exception message: cannot search unknown field 'TableField(name='p_cartcode',langPK='null',type=redirectpaymentinfo)' within type redirectpaymentinfo unless you disable checking , infoMap=TypeInfoMap for type = 8796143026258 code = RedirectPaymentInfo superType = 8796094300242 itemTable = hyb_paymentinfos UPTable = hyb_paymentinfosup LTableName = hyb_paymentinfoslp PropsTable = hyb_props core fields = owner = [owner,OwnerPkString,class de.hybris.platform.util.ItemPropertyValue] modifiedtime = [modifiedtime,modifiedTS,class java.util.Date] itemtype = [itemtype,TypePkString,class de.hybris.platform.util.ItemPropertyValue] creationtime = [creationtime,createdTS,class java.util.Date] pk = [pk,PK,class de.hybris.platform.core.PK] unlocalized fields = generatedbysavedcard = [generatedBySavedCard,p_generatedbysavedcard,class java.lang.Boolean] saved = [saved,p_saved,class java.lang.Boolean] paymentdata = [paymentData,p_paymentdata,class java.lang.String] type = [type,p_type,class de.hybris.platform.util.ItemPropertyValue] nextauthorizationcode = [nextAuthorizationCode,p_nextauthorizationcode,class java.lang.String] devicefingerprintlongstring = [deviceFingerprintLongString,p_devicefingerprintlongstring,class java.lang.String] invoicefiscalsubtype = [invoiceFiscalSubType,p_invoicefiscalsubtype,class de.hybris.platform.util.ItemPropertyValue] taxid = [taxId,p_taxid,class java.lang.String] details = [details,p_details,class java.lang.Object] fakeauthorizationtype = [FakeAuthorizationType,p_fakeauthorizationtype,class de.hybris.platform.util.ItemPropertyValue] frontendurl2 = [frontendUrl2,p_frontendurl2,class java.lang.String] cardlast4digits = [cardLast4Digits,p_cardlast4digits,class java.lang.String] redirected = [redirected,p_redirected,class java.lang.Boolean] sealed = [sealed,sealed,class java.lang.Boolean] invoicefiscaltypecode = [invoiceFiscalTypeCode,p_invoicefiscaltypecode,class java.lang.String] genericparameters = [genericParameters,p_genericparameters,class java.lang.Object] authenticationid = [authenticationId,p_authenticationid,class java.lang.String] inreview = [inReview,p_inreview,class java.lang.Boolean] duplicate = [duplicate,p_duplicate,class java.lang.Boolean] invoicerequested = [invoiceRequested,p_invoicerequested,class java.lang.Boolean] fiscalcfdicode = [fiscalCfdiCode,p_fiscalcfdicode,class java.lang.String] threedstype = [threeDsType,p_threedstype,class de.hybris.platform.util.ItemPropertyValue] skipauthentication = [skipAuthentication,p_skipauthentication,class java.lang.Boolean] isforconfirmlending = [isForConfirmLending,p_isforconfirmlending,class java.lang.Boolean] authorizationcode = [authorizationCode,p_authorizationcode,class java.lang.String] frontendurl = [frontendUrl,p_frontendurl,class java.lang.String] invoicerequired = [invoiceRequired,p_invoicerequired,class java.lang.Boolean] storetokenrequest = [storeTokenRequest,p_storetokenrequest,class java.lang.Boolean] pspreferencefromoknotification = [pspReferenceFromOkNotification,p_pspreferencefromoknotificati,class java.lang.String] code = [code,p_code,class java.lang.String] paymentmodeonfirstusage = [paymentModeOnFirstUsage,p_paymentmodeonfirstusage,class de.hybris.platform.util.ItemPropertyValue] redirectiontype = [redirectionType,p_redirectiontype,class de.hybris.platform.util.ItemPropertyValue] expirationmonth = [expirationMonth,p_expirationmonth,class java.lang.String] pspreferencefrompendingnotification = [pspReferenceFromPendingNotification,p_pspreferencefrompendingnotif,class java.lang.String] iscreditcard = [isCreditCard,p_iscreditcard,class java.lang.Boolean] billingaddress = [billingAddress,p_billingaddress,class de.hybris.platform.util.ItemPropertyValue] challenged = [challenged,p_challenged,class java.lang.Boolean] provider = [provider,p_provider,class java.lang.String] expirationyear = [expirationYear,p_expirationyear,class java.lang.String] cardholdername = [cardHolderName,p_cardholdername,class java.lang.String] currency = [currency,p_currency,class java.lang.String] fiscalid = [fiscalId,p_fiscalid,class java.lang.String] authentication = [authentication,p_authentication,class de.hybris.platform.util.ItemPropertyValue] invoicefiscaltype = [invoiceFiscalType,p_invoicefiscaltype,class de.hybris.platform.util.ItemPropertyValue] amount = [amount,p_amoun0,class java.math.BigDecimal] original = [original,p_original,class de.hybris.platform.util.ItemPropertyValue] cartcode = [cartCode,p_cartcode,class java.lang.String] paymentmodecode = [paymentModeCode,p_paymentmodecode,class java.lang.String] hashcart = [hashCart,p_hashcart,class java.lang.String] fiscalsurname = [fiscalSurname,p_fiscalsurname,class java.lang.String] fiscalregimecode = [fiscalRegimeCode,p_fiscalregimecode,class java.lang.String] riskscore = [riskScore,p_riskscore,class java.math.BigDecimal] fiscalname = [fiscalName,p_fiscalname,class java.lang.String] recurrenttoken = [recurrentToken,p_recurrenttoken,class java.lang.String] user = [user,p_user,class de.hybris.platform.util.ItemPropertyValue] buyername = [buyerName,p_buyername,class java.lang.String] localized fields = [] )
