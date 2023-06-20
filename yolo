@@ -148,3 +148,8 @@ WHERE {o:originalVersion} IS NULL
     AND {OR:reasonID} NOT IN ('R27', 'R28')
 ORDER BY {o:date} DESC;
 
+WHERE {o:originalVersion} IS NULL
+AND {o:code} NOT LIKE '%BLIND%'
+AND {o:creationTime} BETWEEN CAST('2023-01-01 00:00:00' AS DATETIME) AND CAST('2023-06-15 23:59:59' AS DATETIME)
+AND {country.isocode} = 'DE' and {pmist:code} = 'COMPLETED' and {ot:typeid} in ('ZLD','ZL2','ZL3','ZL4','ZLR') AND {OR:reasonID} NOT IN ('R27','R28')
+ORDER BY {o:date} DESC
