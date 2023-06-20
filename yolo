@@ -64,7 +64,43 @@ hjmpTS	createdTS	modifiedTS	TypePkString	OwnerPkString	PK	sealed	p_original	p_co
 
 
 
-
+SELECT DISTINCT {o:code} AS 'ORDER CODE',
+       {o:placedCartId} AS 'CART CODE',
+       {o:date} AS 'DATE',
+       {ot:typeid} AS 'ORDER TYPE',
+       {OR:reasonID} as 'Order Reason',
+       {ex:code} AS 'EXPORT STATUS',
+       {pmist:code} AS 'PMI ORDER STATUS',
+       {pm.name} as 'Payment Mode',
+       {ps.code} as 'Payment Status',
+       {pi.itemType} as 'Payment Info',
+       {dm.name} as 'Delivery Mode',
+       {ds.code} as 'Delivery Status',
+       {site:uid} AS 'SITE',
+       {store:uid} AS 'BASE STORE',
+       {sale:code} AS 'TOUCH POINT',
+       {oc.code} as 'ORDER_CHANNEL',
+       {rpi:p_subscriptionid} as 'Subscription ID',
+       {rpi:p_recurrenttoken} as 'Recurrent Token'
+	
+FROM {Order AS o
+LEFT JOIN ExportStatus AS ex ON {ex:pk}={o:exportStatus}
+LEFT JOIN CmsSite AS site ON {o:site}={site:pk}
+LEFT JOIN BaseStore AS store ON {o:store}={store:pk}
+JOIN Country AS country ON {store:country} = {country:pk}
+LEFT JOIN PmiOrderStatus AS pmist ON {pmist:pk}={o:pmiOrderStatus}
+LEFT JOIN OrderType AS ot ON {o:orderType}={ot:pk}
+LEFT JOIN OrderStatus AS hst ON {o:status}={hst:pk}
+LEFT JOIN OrderReason AS OR ON {o:orderReason}={OR:pk}
+LEFT JOIN SalesApplication AS sale ON {sale:pk}={o:salesApplication}
+LEFT JOIN PaymentMode as pm on {o.paymentMode}={pm.pk}
+LEFT JOIN PaymentStatus as ps on {o.paymentStatus}={ps:pk}
+LEFT JOIN PaymentInfo as pi on {o.paymentinfo}={pi.pk}
+LEFT JOIN DeliveryMode as dm on {o.deliveryMode}={dm.pk}
+LEFT JOIN DeliveryStatus as ds on {o.deliveryStatus}={ds:pk}
+LEFT JOIN OrderChannel AS oc ON {o:orderChannel} = {oc:pk}
+LEFT JOIN redirectpaymentinfo AS rpi ON {rpi:OwnerPkString} = {o:pk}
+}
 
 
 
