@@ -50,10 +50,7 @@ From redirectpaymentinfo I want to retrieve column 'p_recurrenttoken' and column
 The column that should be mutual on both tables is a column containing the cart code. On the redirectpaymentinfo is 'p_cartcode' and on the output of the initial query it is called 'CART CODE'.
 Can you assist?
 
-
-SELECT
-    rpi.p_recurrenttoken AS 'RECURRENT TOKEN',
-    rpi.p_subscriptionid AS 'SUBSCRIPTION ID',
+SELECT DISTINCT
     o.code AS 'ORDER CODE',
     o.placedCartId AS 'CART CODE',
     o.date AS 'DATE',
@@ -69,67 +66,50 @@ SELECT
     site.uid AS 'SITE',
     store.uid AS 'BASE STORE',
     sale.code AS 'TOUCH POINT',
-    oc.code AS 'ORDER CHANNEL'
+    oc.code AS 'ORDER CHANNEL',
+    rpi.p_recurrenttoken AS 'RECURRENT TOKEN',
+    rpi.p_subscriptionid AS 'SUBSCRIPTION ID'
 FROM
-    (SELECT DISTINCT
-        o.code,
-        o.placedCartId,
-        o.date,
-        ot.typeid,
-        OR.reasonID,
-        ex.code,
-        pmist.code,
-        pm.name,
-        ps.code,
-        pi.itemType,
-        dm.name,
-        ds.code,
-        site.uid,
-        store.uid,
-        sale.code,
-        oc.code
-    FROM
-        Order AS o
-    LEFT JOIN
-        ExportStatus AS ex ON ex.pk = o.exportStatus
-    LEFT JOIN
-        CmsSite AS site ON o.site = site.pk
-    LEFT JOIN
-        BaseStore AS store ON o.store = store.pk
-    JOIN
-        Country AS country ON store.country = country.pk
-    LEFT JOIN
-        PmiOrderStatus AS pmist ON pmist.pk = o.pmiOrderStatus
-    LEFT JOIN
-        OrderType AS ot ON o.orderType = ot.pk
-    LEFT JOIN
-        OrderStatus AS hst ON o.status = hst.pk
-    LEFT JOIN
-        OrderReason AS OR ON o.orderReason = OR.pk
-    LEFT JOIN
-        SalesApplication AS sale ON sale.pk = o.salesApplication
-    LEFT JOIN
-        PaymentMode AS pm ON o.paymentMode = pm.pk
-    LEFT JOIN
-        PaymentStatus AS ps ON o.paymentStatus = ps.pk
-    LEFT JOIN
-        PaymentInfo AS pi ON o.paymentinfo = pi.pk
-    LEFT JOIN
-        DeliveryMode AS dm ON o.deliveryMode = dm.pk
-    LEFT JOIN
-        DeliveryStatus AS ds ON o.deliveryStatus = ds.pk
-    LEFT JOIN
-        OrderChannel AS oc ON o.orderChannel = oc.pk
-    WHERE
-        o.originalVersion IS NULL
-        AND o.code NOT LIKE '%BLIND%'
-        AND o.creationTime BETWEEN CAST('2023-01-01 00:00:00' AS DATETIME) AND CAST('2023-06-15 23:59:59' AS DATETIME)
-        AND country.isocode = 'DE'
-        AND pmist.code = 'COMPLETED'
-        AND ot.typeid IN ('ZLD', 'ZL2', 'ZL3', 'ZL4', 'ZLR')
-        AND OR.reasonID NOT IN ('R27', 'R28')
-    ORDER BY
-        o.date DESC) AS result
+    Order AS o
 LEFT JOIN
-    redirectpaymentinfo AS rpi ON result.`CART CODE` = rpi.p_cartcode;
-
+    ExportStatus AS ex ON ex.pk = o.exportStatus
+LEFT JOIN
+    CmsSite AS site ON o.site = site.pk
+LEFT JOIN
+    BaseStore AS store ON o.store = store.pk
+JOIN
+    Country AS country ON store.country = country.pk
+LEFT JOIN
+    PmiOrderStatus AS pmist ON pmist.pk = o.pmiOrderStatus
+LEFT JOIN
+    OrderType AS ot ON o.orderType = ot.pk
+LEFT JOIN
+    OrderStatus AS hst ON o.status = hst.pk
+LEFT JOIN
+    OrderReason AS OR ON o.orderReason = OR.pk
+LEFT JOIN
+    SalesApplication AS sale ON sale.pk = o.salesApplication
+LEFT JOIN
+    PaymentMode AS pm ON o.paymentMode = pm.pk
+LEFT JOIN
+    PaymentStatus AS ps ON o.paymentStatus = ps.pk
+LEFT JOIN
+    PaymentInfo AS pi ON o.paymentinfo = pi.pk
+LEFT JOIN
+    DeliveryMode AS dm ON o.deliveryMode = dm.pk
+LEFT JOIN
+    DeliveryStatus AS ds ON o.deliveryStatus = ds.pk
+LEFT JOIN
+    OrderChannel AS oc ON o.orderChannel = oc.pk
+LEFT JOIN
+    redirectpaymentinfo AS rpi ON o.placedCartId = rpi.p_cartcode
+WHERE
+    o.originalVersion IS NULL
+    AND o.code NOT LIKE '%BLIND%'
+    AND o.creationTime BETWEEN CAST('2023-01-01 00:00:00' AS DATETIME) AND CAST('2023-06-15 23:59:59' AS DATETIME)
+    AND country.isocode = 'DE'
+    AND pmist.code = 'COMPLETED'
+    AND ot.typeid IN ('ZLD', 'ZL2', 'ZL3', 'ZL4', 'ZLR')
+    AND OR.reasonID NOT IN ('R27', 'R28')
+ORDER BY
+    o.date DESC;
