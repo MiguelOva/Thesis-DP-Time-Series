@@ -1,148 +1,34 @@
 SELECT DISTINCT {o:code} AS 'ORDER CODE',
-       {o:placedCartId} AS 'CART CODE',
        {o:date} AS 'DATE',
-       {ot:typeid} AS 'ORDER TYPE',
-       {OR:reasonID} as 'Order Reason',
-       {ex:code} AS 'EXPORT STATUS',
-       {pmist:code} AS 'PMI ORDER STATUS',
-       {pm.name} as 'Payment Mode',
-       {ps.code} as 'Payment Status',
-       {pi.itemType} as 'Payment Info',
-       {dm.name} as 'Delivery Mode',
-       {ds.code} as 'Delivery Status',
-       {site:uid} AS 'SITE',
+       {cn:isocode} AS 'country',
        {store:uid} AS 'BASE STORE',
-       {sale:code} AS 'TOUCH POINT',
-       {oc.code} as 'ORDER_CHANNEL'
-
-
-FROM {Order AS o
-LEFT JOIN ExportStatus AS ex ON {ex:pk}={o:exportStatus}
-LEFT JOIN CmsSite AS site ON {o:site}={site:pk}
-LEFT JOIN BaseStore AS store ON {o:store}={store:pk}
-JOIN Country AS country ON {store:country} = {country:pk}
-LEFT JOIN PmiOrderStatus AS pmist ON {pmist:pk}={o:pmiOrderStatus}
+       {sale:code} AS 'TOUCH POINT',      
+       {oc.code} as 'ORDER_CHANNEL',
+       {ot:typeid} AS 'ORDER TYPE',
+       {odr:reasonID} as 'ORDER_REASON',
+       {pm.name} AS 'Payment Mode',
+       {ps.code} AS 'Payment Status',
+       {ost.code} as 'ORDER_STATUS',
+       {ex:code} as 'ORDER_EXPORT_STATUS'
+       
+FROM {Order as o
+JOIN orderEntry as oe on {oe.order}={o.pk}
+LEFT JOIN OrderChannel AS oc ON {o:orderChannel} = {oc:pk}
+LEFT JOIN PmiOrderStatus AS ost ON {o:pmiOrderStatus}={ost:pk}
 LEFT JOIN OrderType AS ot ON {o:orderType}={ot:pk}
-LEFT JOIN OrderStatus AS hst ON {o:status}={hst:pk}
-LEFT JOIN OrderReason AS OR ON {o:orderReason}={OR:pk}
 LEFT JOIN SalesApplication AS sale ON {sale:pk}={o:salesApplication}
-LEFT JOIN PaymentMode as pm on {o.paymentMode}={pm.pk}
-LEFT JOIN PaymentStatus as ps on {o.paymentStatus}={ps.pk}
-LEFT JOIN PaymentInfo as pi on {o.paymentinfo}={pi.pk}
-LEFT JOIN DeliveryMode as dm on {o.deliveryMode}={dm.pk}
-LEFT JOIN DeliveryStatus as ds on {o.deliveryStatus}={ds.pk}
-LEFT JOIN OrderChannel AS oc ON {o:orderChannel} = {oc:pk}
- 
-}
-WHERE {o:originalVersion} IS NULL
-AND {o:code} NOT LIKE '%BLIND%'
-AND {o:creationTime} BETWEEN CAST('2023-01-01 00:00:00' AS DATETIME) AND CAST('2023-06-15 23:59:59' AS DATETIME)
-AND {country.isocode} = 'DE' and {pmist:code} = 'COMPLETED' and {ot:typeid} in ('ZLD','ZL2','ZL3','ZL4','ZLR') AND {OR:reasonID} NOT IN ('R27','R28')
-ORDER BY {o:date} DESC
-
-
-ORDER CODE	CART CODE	DATE	ORDER TYPE	Order Reason	EXPORT STATUS	PMI ORDER STATUS	Payment Mode	Payment Status	Payment Info	Delivery Mode	Delivery Status	SITE	BASE STORE	TOUCH POINT	ORDER_CHANNEL
-21986260	21650502	2023-06-15 07:55:11.986	ZLD	R29	EXPORTED	COMPLETED	Adyen	PAYMENT_CAPTURED	8796098854994	Free delivery	DELIVERED	iqos-de-B2C-web	iqos-de-B2C-web	Ecommerce	WEBSITE
-21986501	21986230	2023-06-15 06:02:20.876	ZLD	R29	EXPORTED	COMPLETED	Adyen	PAYMENT_CAPTURED	8796098854994	Free delivery	DELIVERED	iqos-de-B2C-web	iqos-de-B2C-web	Ecommerce	WEBSITE
-
-
-From redirectpaymentinfo I want to retrieve column 'p_recurrenttoken' and column 'p_subscriptionid' 
-The column that should be mutual on both tables is a column containing the cart code. On the redirectpaymentinfo is 'p_cartcode' and on the output of the initial query it is called 'CART CODE'.
-Can you assist?
-
-SELECT DISTINCT
-    {o:code} AS 'ORDER CODE',
-    {o:placedCartId} AS 'CART CODE',
-    {o:date} AS 'DATE',
-    {ot:typeid} AS 'ORDER TYPE',
-    {OR:reasonID} AS 'ORDER REASON',
-    {ex:code} AS 'EXPORT STATUS',
-    {pmist:code} AS 'PMI ORDER STATUS',
-    {pm.name} AS 'Payment Mode',
-    {ps.code} AS 'Payment Status',
-    {pi.itemType} AS 'Payment Info',
-    {dm.name} AS 'Delivery Mode',
-    {ds.code} AS 'Delivery Status',
-    {site:uid} AS 'SITE',
-    {store:uid} AS 'BASE STORE',
-    {sale:code} AS 'TOUCH POINT',
-    {oc.code} AS 'ORDER CHANNEL',
-    rpi.p_recurrenttoken AS 'RECURRENT TOKEN',
-    rpi.p_subscriptionid AS 'SUBSCRIPTION ID'
-FROM
-    {Order AS o
-LEFT JOIN ExportStatus AS ex ON {ex:pk} = {o:exportStatus}
-LEFT JOIN CmsSite AS site ON {o:site} = {site:pk}
-LEFT JOIN BaseStore AS store ON {o:store} = {store:pk}
-JOIN Country AS country ON {store:country} = {country:pk}
-LEFT JOIN PmiOrderStatus AS pmist ON {pmist:pk} = {o:pmiOrderStatus}
-LEFT JOIN OrderType AS ot ON {o:orderType} = {ot:pk}
-LEFT JOIN OrderStatus AS hst ON {o:status} = {hst:pk}
-LEFT JOIN OrderReason AS OR ON {o:orderReason} = {OR:pk}
-LEFT JOIN SalesApplication AS sale ON {sale:pk} = {o:salesApplication}
+JOIN BaseStore as store on {o:store}={store:pk}
+LEFT JOIN Country AS cn ON {store:country}={cn:pk}
 LEFT JOIN PaymentMode AS pm ON {o:paymentMode} = {pm:pk}
 LEFT JOIN PaymentStatus AS ps ON {o:paymentStatus} = {ps:pk}
-LEFT JOIN PaymentInfo AS pi ON {o:paymentinfo} = {pi:pk}
-LEFT JOIN DeliveryMode AS dm ON {o:deliveryMode} = {dm:pk}
-LEFT JOIN DeliveryStatus AS ds ON {o:deliveryStatus} = {ds:pk}
-LEFT JOIN OrderChannel AS oc ON {o:orderChannel} = {oc:pk}
-LEFT JOIN redirectpaymentinfo AS rpi ON {o:placedCartId} = rpi.p_cartcode}
-
-WHERE {o:originalVersion} IS NULL
-    AND {o:code} NOT LIKE '%BLIND%'
-    AND {o:creationTime} BETWEEN CAST('2023-01-01 00:00:00' AS DATETIME) AND CAST('2023-06-15 23:59:59' AS DATETIME)
-    AND {country.isocode} = 'DE'
-    AND {pmist:code} = 'COMPLETED'
-    AND {ot:typeid} IN ('ZLD', 'ZL2', 'ZL3', 'ZL4', 'ZLR')
-    AND {OR:reasonID} NOT IN ('R27', 'R28')
-ORDER BY {o:date} DESC;
+LEFT JOIN ExportStatus AS ex ON {ex:pk}={o:exportStatus}
+LEFT JOIN OrderReason AS odr ON {o:orderReason}={odr:pk}
 
 
-Exception message: Incorrect syntax near 'OFFSET'.
-
-SELECT DISTINCT
-    {o:code} AS 'ORDER CODE',
-    {o:placedCartId} AS 'CART CODE',
-    {o:date} AS 'DATE',
-    {ot:typeid} AS 'ORDER TYPE',
-    {OR:reasonID} AS 'ORDER REASON',
-    {ex:code} AS 'EXPORT STATUS',
-    {pmist:code} AS 'PMI ORDER STATUS',
-    {pm.name} AS 'Payment Mode',
-    {ps.code} AS 'Payment Status',
-    {pi.itemType} AS 'Payment Info',
-    {dm.name} AS 'Delivery Mode',
-    {ds.code} AS 'Delivery Status',
-    {site:uid} AS 'SITE',
-    {store:uid} AS 'BASE STORE',
-    {sale:code} AS 'TOUCH POINT',
-    {oc.code} AS 'ORDER CHANNEL',
-    rpi.p_recurrenttoken AS 'RECURRENT TOKEN',
-    rpi.p_subscriptionid AS 'SUBSCRIPTION ID'
-    
-FROM {Order AS o
-LEFT JOIN ExportStatus AS ex ON {ex:pk} = {o:exportStatus}
-LEFT JOIN CmsSite AS site ON {o:site} = {site:pk}
-LEFT JOIN BaseStore AS store ON {o:store} = {store:pk}
-JOIN Country AS country ON {store:country} = {country:pk}
-LEFT JOIN PmiOrderStatus AS pmist ON {pmist:pk} = {o:pmiOrderStatus}
-LEFT JOIN OrderType AS ot ON {o:orderType} = {ot:pk}
-LEFT JOIN OrderStatus AS hst ON {o:status} = {hst:pk}
-LEFT JOIN OrderReason AS OR ON {o:orderReason} = {OR:pk}
-LEFT JOIN SalesApplication AS sale ON {sale:pk} = {o:salesApplication}
-LEFT JOIN PaymentMode AS pm ON {o:paymentMode} = {pm:pk}
-LEFT JOIN PaymentStatus AS ps ON {o:paymentStatus} = {ps:pk}
-LEFT JOIN PaymentInfo AS pi ON {o:paymentinfo} = {pi:pk}
-LEFT JOIN DeliveryMode AS dm ON {o:deliveryMode} = {dm:pk}
-LEFT JOIN DeliveryStatus AS ds ON {o:deliveryStatus} = {ds:pk}
-LEFT JOIN OrderChannel AS oc ON {o:orderChannel} = {oc:pk}
-LEFT JOIN redirectpaymentinfo AS rpi ON {o:placedCartId} = {rpi.p_cartcode}
 }
+WHERE 
+    {o.code} IN ('21764253','21764245','21764226','21762237','21759334','21762212','21869944','21868642')
 
-WHERE {o:originalVersion} IS NULL
-AND {o:code} NOT LIKE '%BLIND%'
-AND {o:creationTime} BETWEEN CAST('2023-01-01 00:00:00' AS DATETIME) AND CAST('2023-06-15 23:59:59' AS DATETIME)
-AND {country.isocode} = 'DE' and {pmist:code} = 'COMPLETED' and {ot:typeid} in ('ZLD','ZL2','ZL3','ZL4','ZLR') AND {OR:reasonID} NOT IN ('R27','R28')
-ORDER BY {o:date} DESC
 
-Exception message: cannot search unknown field 'TableField(name='p_cartcode',langPK='null',type=redirectpaymentinfo)' within type redirectpaymentinfo unless you disable checking , infoMap=TypeInfoMap for type = 8796143026258 code = RedirectPaymentInfo superType = 8796094300242 itemTable = hyb_paymentinfos UPTable = hyb_paymentinfosup LTableName = hyb_paymentinfoslp PropsTable = hyb_props core fields = owner = [owner,OwnerPkString,class de.hybris.platform.util.ItemPropertyValue] modifiedtime = [modifiedtime,modifiedTS,class java.util.Date] itemtype = [itemtype,TypePkString,class de.hybris.platform.util.ItemPropertyValue] creationtime = [creationtime,createdTS,class java.util.Date] pk = [pk,PK,class de.hybris.platform.core.PK] unlocalized fields = generatedbysavedcard = [generatedBySavedCard,p_generatedbysavedcard,class java.lang.Boolean] saved = [saved,p_saved,class java.lang.Boolean] paymentdata = [paymentData,p_paymentdata,class java.lang.String] type = [type,p_type,class de.hybris.platform.util.ItemPropertyValue] nextauthorizationcode = [nextAuthorizationCode,p_nextauthorizationcode,class java.lang.String] devicefingerprintlongstring = [deviceFingerprintLongString,p_devicefingerprintlongstring,class java.lang.String] invoicefiscalsubtype = [invoiceFiscalSubType,p_invoicefiscalsubtype,class de.hybris.platform.util.ItemPropertyValue] taxid = [taxId,p_taxid,class java.lang.String] details = [details,p_details,class java.lang.Object] fakeauthorizationtype = [FakeAuthorizationType,p_fakeauthorizationtype,class de.hybris.platform.util.ItemPropertyValue] frontendurl2 = [frontendUrl2,p_frontendurl2,class java.lang.String] cardlast4digits = [cardLast4Digits,p_cardlast4digits,class java.lang.String] redirected = [redirected,p_redirected,class java.lang.Boolean] sealed = [sealed,sealed,class java.lang.Boolean] invoicefiscaltypecode = [invoiceFiscalTypeCode,p_invoicefiscaltypecode,class java.lang.String] genericparameters = [genericParameters,p_genericparameters,class java.lang.Object] authenticationid = [authenticationId,p_authenticationid,class java.lang.String] inreview = [inReview,p_inreview,class java.lang.Boolean] duplicate = [duplicate,p_duplicate,class java.lang.Boolean] invoicerequested = [invoiceRequested,p_invoicerequested,class java.lang.Boolean] fiscalcfdicode = [fiscalCfdiCode,p_fiscalcfdicode,class java.lang.String] threedstype = [threeDsType,p_threedstype,class de.hybris.platform.util.ItemPropertyValue] skipauthentication = [skipAuthentication,p_skipauthentication,class java.lang.Boolean] isforconfirmlending = [isForConfirmLending,p_isforconfirmlending,class java.lang.Boolean] authorizationcode = [authorizationCode,p_authorizationcode,class java.lang.String] frontendurl = [frontendUrl,p_frontendurl,class java.lang.String] invoicerequired = [invoiceRequired,p_invoicerequired,class java.lang.Boolean] storetokenrequest = [storeTokenRequest,p_storetokenrequest,class java.lang.Boolean] pspreferencefromoknotification = [pspReferenceFromOkNotification,p_pspreferencefromoknotificati,class java.lang.String] code = [code,p_code,class java.lang.String] paymentmodeonfirstusage = [paymentModeOnFirstUsage,p_paymentmodeonfirstusage,class de.hybris.platform.util.ItemPropertyValue] redirectiontype = [redirectionType,p_redirectiontype,class de.hybris.platform.util.ItemPropertyValue] expirationmonth = [expirationMonth,p_expirationmonth,class java.lang.String] pspreferencefrompendingnotification = [pspReferenceFromPendingNotification,p_pspreferencefrompendingnotif,class java.lang.String] iscreditcard = [isCreditCard,p_iscreditcard,class java.lang.Boolean] billingaddress = [billingAddress,p_billingaddress,class de.hybris.platform.util.ItemPropertyValue] challenged = [challenged,p_challenged,class java.lang.Boolean] provider = [provider,p_provider,class java.lang.String] expirationyear = [expirationYear,p_expirationyear,class java.lang.String] cardholdername = [cardHolderName,p_cardholdername,class java.lang.String] currency = [currency,p_currency,class java.lang.String] fiscalid = [fiscalId,p_fiscalid,class java.lang.String] authentication = [authentication,p_authentication,class de.hybris.platform.util.ItemPropertyValue] invoicefiscaltype = [invoiceFiscalType,p_invoicefiscaltype,class de.hybris.platform.util.ItemPropertyValue] amount = [amount,p_amoun0,class java.math.BigDecimal] original = [original,p_original,class de.hybris.platform.util.ItemPropertyValue] cartcode = [cartCode,p_cartcode,class java.lang.String] paymentmodecode = [paymentModeCode,p_paymentmodecode,class java.lang.String] hashcart = [hashCart,p_hashcart,class java.lang.String] fiscalsurname = [fiscalSurname,p_fiscalsurname,class java.lang.String] fiscalregimecode = [fiscalRegimeCode,p_fiscalregimecode,class java.lang.String] riskscore = [riskScore,p_riskscore,class java.math.BigDecimal] fiscalname = [fiscalName,p_fiscalname,class java.lang.String] recurrenttoken = [recurrentToken,p_recurrenttoken,class java.lang.String] user = [user,p_user,class de.hybris.platform.util.ItemPropertyValue] buyername = [buyerName,p_buyername,class java.lang.String] localized fields = [] )
+
+Change the above sintax, so that it works with an "EXISTS" instead of the "IN" to reduce complexity.
